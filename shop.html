@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clay &amp; Kiln – Handmade Home Goods</title>
+<style>
+  :root {
+    --bg:#f3efe9; --panel:#fffdf9; --ink:#2a2420; --muted:#6f655d; --line:#ddd3c8;
+    --accent:#2f5d62; --accent-ink:#fff; --sale:#b5452f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#171412; --panel:#221e1b; --ink:#f1ebe4; --muted:#a79c92; --line:#3a332d;
+            --accent:#7fc1c7; --accent-ink:#10201f; --sale:#e58a74; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.5}
+  h1,h2,h3,button,.price{font-family:"Trebuchet MS",system-ui,sans-serif}
+  header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+  .logo{font-size:1.4rem;font-weight:700;letter-spacing:-.01em;margin:0}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:.5rem .9rem}
+  button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .hero{padding:3.5rem 1.5rem 2rem;max-width:1000px;margin:0 auto}
+  .hero h2{font-size:clamp(2rem,6vw,3.4rem);line-height:1.1;margin:0 0 .75rem;max-width:14em}
+  .hero p{color:var(--muted);max-width:34em;margin:0}
+  .filters{max-width:1000px;margin:1.5rem auto 1rem;padding:0 1.5rem;display:flex;gap:.5rem;flex-wrap:wrap}
+  .filters button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .grid{max-width:1000px;margin:0 auto;padding:0 1.5rem 3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.25rem}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .pic{height:150px;display:grid;place-items:center;font-size:3.5rem}
+  .info{padding:1rem;display:flex;flex-direction:column;gap:.35rem;flex:1}
+  .info h3{margin:0;font-size:1.05rem}
+  .info p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+  .price{font-weight:700}
+  .price s{color:var(--muted);font-weight:400;margin-left:.4rem}
+  .price em{color:var(--sale);font-style:normal;font-size:.85rem;margin-left:.4rem}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:9}
+  .scrim.open{display:block}
+  aside{position:fixed;top:0;right:0;height:100%;width:min(380px,100%);background:var(--panel);border-left:1px solid var(--line);z-index:10;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+  aside.open{transform:none}
+  aside header{position:static}
+  #items{flex:1;overflow:auto;padding:1rem 1.5rem;margin:0;list-style:none}
+  #items li{display:flex;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--line)}
+  .qty{display:flex;align-items:center;gap:.4rem;margin-top:.35rem}
+  .qty button{padding:.1rem .6rem}
+  .foot{padding:1rem 1.5rem;border-top:1px solid var(--line)}
+  .total{display:flex;justify-content:space-between;font-weight:700;margin-bottom:.75rem}
+  .foot .primary{width:100%;padding:.75rem}
+  .msg{padding:1.5rem;color:var(--muted)}
+  footer.site{text-align:center;color:var(--muted);padding:2rem;border-top:1px solid var(--line);font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <p class="logo">Clay &amp; Kiln</p>
+  <button id="openCart" aria-label="Open cart">Cart (<span id="cartCount">0</span>)</button>
+</header>
+
+<section class="hero">
+  <h2>Handmade things for a slower home.</h2>
+  <p>Small-batch ceramics, linen and candles, made by independent makers and shipped in plastic-free packaging.</p>
+</section>
+
+<div class="filters" id="filters" role="group" aria-label="Filter products"></div>
+<main class="grid" id="grid"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside id="cart" aria-label="Shopping cart" aria-hidden="true">
+  <header><h2 style="margin:0;font-size:1.2rem">Your cart</h2><button id="closeCart">Close</button></header>
+  <ul id="items"></ul>
+  <div class="foot">
+    <div class="total"><span>Total</span><span id="total"></span></div>
+    <button class="primary" id="checkout">Check out</button>
+  </div>
+</aside>
+
+<footer class="site">© Clay &amp; Kiln. Free shipping on orders over 2,000.</footer>
+
+<script>
+  const CUR = "₹";
+  const PRODUCTS = [
+    {id:1,name:"Stoneware mug",cat:"Ceramics",price:600,old:750,desc:"Hand-thrown, 300 ml, dishwasher safe.",icon:"☕",bg:"#d9c3a5"},
+    {id:2,name:"Speckled bowl set",cat:"Ceramics",price:1800,desc:"Set of four, glazed in oat white.",icon:"🥣",bg:"#cfd8d3"},
+    {id:3,name:"Flat serving plate",cat:"Ceramics",price:1200,desc:"26 cm plate with a matte rim.",icon:"🍽️",bg:"#e3cfc0"},
+    {id:4,name:"Linen napkins",cat:"Textiles",price:900,desc:"Stonewashed linen, pack of four.",icon:"🧺",bg:"#d6d0e0"},
+    {id:5,name:"Woven table runner",cat:"Textiles",price:1500,desc:"Cotton, 180 cm, natural dyes.",icon:"🧵",bg:"#e5d5a8"},
+    {id:6,name:"Beeswax candle",cat:"Candles",price:450,desc:"Pure beeswax, 40 hour burn.",icon:"🕯️",bg:"#f0dfae"},
+    {id:7,name:"Cedar soy candle",cat:"Candles",price:650,old:800,desc:"Soy wax in a reusable clay jar.",icon:"🌿",bg:"#c4d6c0"},
+    {id:8,name:"Terracotta planter",cat:"Ceramics",price:700,desc:"Drainage hole and saucer included.",icon:"🪴",bg:"#e0b9a4"}
+  ];
+  let cart = {}, cat = "All";
+  try { cart = JSON.parse(localStorage.getItem("cart")) || {}; } catch(e) {}
+
+  const $ = id => document.getElementById(id);
+  const money = n => CUR + n.toLocaleString("en-IN");
+  const save = () => { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch(e) {} };
+
+  function renderFilters() {
+    const cats = ["All", ...new Set(PRODUCTS.map(p => p.cat))];
+    $("filters").innerHTML = "";
+    cats.forEach(c => {
+      const b = document.createElement("button");
+      b.textContent = c; b.setAttribute("aria-pressed", c === cat);
+      b.onclick = () => { cat = c; renderFilters(); renderGrid(); };
+      $("filters").appendChild(b);
+    });
+  }
+
+  function renderGrid() {
+    $("grid").innerHTML = "";
+    PRODUCTS.filter(p => cat === "All" || p.cat === cat).forEach(p => {
+      const d = document.createElement("article");
+      d.className = "card";
+      d.innerHTML = '<div class="pic" style="background:' + p.bg + '" aria-hidden="true">' + p.icon + '</div>' +
+        '<div class="info"><h3>' + p.name + '</h3><p>' + p.desc + '</p>' +
+        '<div class="price">' + money(p.price) + (p.old ? '<s>' + money(p.old) + '</s><em>Sale</em>' : '') + '</div>' +
+        '<button class="primary">Add to cart</button></div>';
+      d.querySelector("button").onclick = () => { cart[p.id] = (cart[p.id] || 0) + 1; save(); renderCart(); openCart(); };
+      $("grid").appendChild(d);
+    });
+  }
+
+  function renderCart() {
+    const ids = Object.keys(cart);
+    let total = 0, count = 0;
+    $("items").innerHTML = ids.length ? "" : '<li class="msg">Your cart is empty. Add something from the shop.</li>';
+    ids.forEach(id => {
+      const p = PRODUCTS.find(x => x.id == id), q = cart[id];
+      total += p.price * q; count += q;
+      const li = document.createElement("li");
+      li.innerHTML = '<div><strong>' + p.name + '</strong><div class="qty"><button aria-label="Decrease">−</button><span>' + q + '</span><button aria-label="Increase">+</button></div></div><div class="price">' + money(p.price * q) + '</div>';
+      const [minus, plus] = li.querySelectorAll("button");
+      minus.onclick = () => { cart[id]--; if (cart[id] <= 0) delete cart[id]; save(); renderCart(); };
+      plus.onclick = () => { cart[id]++; save(); renderCart(); };
+      $("items").appendChild(li);
+    });
+    $("total").textContent = money(total);
+    $("cartCount").textContent = count;
+  }
+
+  function openCart(){ $("cart").classList.add("open"); $("scrim").classList.add("open"); $("cart").setAttribute("aria-hidden","false"); }
+  function closeCart(){ $("cart").classList.remove("open"); $("scrim").classList.remove("open"); $("cart").setAttribute("aria-hidden","true"); }
+  $("openCart").onclick = openCart; $("closeCart").onclick = closeCart; $("scrim").onclick = closeCart;
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeCart(); });
+  $("checkout").onclick = () => {
+    if (!Object.keys(cart).length) return alert("Your cart is empty.");
+    alert("Thanks! This is a demo shop, so no payment was taken.");
+    cart = {}; save(); renderCart(); closeCart();
+  };
+
+  renderFilters(); renderGrid(); renderCart();
+</script>
+</body>
+</html>
