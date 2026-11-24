@@ -1,4 +1,4 @@
-# Clay & Kiln – Shop Website
+# Shoppy – Shop Website
 
 A simple online shop for handmade home goods, built with plain HTML, CSS and JavaScript. No frameworks or installs needed.
 
