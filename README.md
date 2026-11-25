@@ -20,7 +20,7 @@ A simple online shop for handmade home goods, built with plain HTML, CSS and Jav
 ## Live site
 
 If GitHub Pages is on, the site is at:
-`https://YOUR-USERNAME.github.io/REPO-NAME/`
+`https://YOUR-USERNAME.github.io/latheree/`
 
 To turn it on: **Settings → Pages → Branch: main → Save**.
 
