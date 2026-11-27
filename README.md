@@ -11,6 +11,7 @@ A simple online shop for handmade home goods,its Name was Shoppy and built with 
 - Cart is saved in the browser, so it stays after a refresh
 - Works on phones and desktops, in light and dark mode
 - Demo checkout (no real payment)
+- No real Amount need.
 
 ## How to run
 
