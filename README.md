@@ -1,6 +1,6 @@
 # Shoppy – Shop Website
 
-A simple online shop for handmade home goods, built with plain HTML, CSS and JavaScript. No frameworks or installs needed.
+A simple online shop for handmade home goods,its Name was Shoppy and built with plain HTML, CSS and JavaScript. No frameworks or installs needed.
 
 ## Features
 
